@@ -1,0 +1,17 @@
+{% load socialaccount %}
+
+<h2>Login</h2>
+
+<form method="post">
+    {% csrf_token %}
+    <label>Email:</label>
+    <input type="email" name="username" required>
+
+    <label>Password:</label>
+    <input type="password" name="password" required>
+
+    <button type="submit">Login</button>
+</form>
+
+<!-- Add Google Login Button -->
+<a href="{% provider_login_url 'google' %}">Login with Google</a>
