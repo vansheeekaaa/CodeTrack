@@ -1,0 +1,75 @@
+{% load static %}
+
+<div class="sidebar bg-gray-900 text-white h-screen w-1/5 p-4 fixed overflow-y-auto">
+    <div class="text-center">
+        <img src="{% static 'default_profile.png' %}" alt="Profile Picture" class="w-16 h-16 mx-auto rounded-full object-cover">
+        <h2 class="text-lg font-semibold mt-2">{{ user.username }}</h2>
+        <p class="text-sm text-gray-400">{{ user.email }}</p>
+    </div>
+
+    <hr class="my-4 border-gray-600">
+
+    <div class="links">
+        <h3 class="text-md font-semibold mb-2">Coding Profiles</h3>
+        <ul>
+            <li>
+                <a href="{{ user.userprofile.leetcode_link|default:'#' }}" target="_blank" class="text-blue-400 hover:underline">
+                    LeetCode
+                </a> 
+                {% if not user.userprofile.leetcode_link %}<span class="text-gray-500">(Not provided)</span>{% endif %}
+            </li>
+            <li>
+                <a href="{{ user.userprofile.gfg_link|default:'#' }}" target="_blank" class="text-green-400 hover:underline">
+                    GeeksforGeeks
+                </a> 
+                {% if not user.userprofile.gfg_link %}<span class="text-gray-500">(Not provided)</span>{% endif %}
+            </li>
+            <li>
+                <a href="{{ user.userprofile.code360_link|default:'#' }}" target="_blank" class="text-yellow-400 hover:underline">
+                    Code360
+                </a> 
+                {% if not user.userprofile.code360_link %}<span class="text-gray-500">(Not provided)</span>{% endif %}
+            </li>
+            <li>
+                <a href="{{ user.userprofile.github_link|default:'#' }}" target="_blank" class="text-gray-400 hover:underline">
+                    GitHub
+                </a> 
+                {% if not user.userprofile.github_link %}<span class="text-gray-500">(Not provided)</span>{% endif %}
+            </li>
+        </ul>
+    </div>
+
+    <hr class="my-4 border-gray-600">
+
+    <div class="social-links">
+        <h3 class="text-md font-semibold mb-2">Social Links</h3>
+        <ul>
+            <li>
+                <a href="{{ user.userprofile.linkedin_link|default:'#' }}" target="_blank" class="text-blue-400 hover:underline">
+                    LinkedIn
+                </a> 
+                {% if not user.userprofile.linkedin_link %}<span class="text-gray-500">(Not provided)</span>{% endif %}
+            </li>
+            <li>
+                <a href="{{ user.userprofile.twitter_link|default:'#' }}" target="_blank" class="text-blue-300 hover:underline">
+                    Twitter
+                </a> 
+                {% if not user.userprofile.twitter_link %}<span class="text-gray-500">(Not provided)</span>{% endif %}
+            </li>
+            <li>
+                <a href="{{ user.userprofile.portfolio_link|default:'#' }}" target="_blank" class="text-purple-400 hover:underline">
+                    Portfolio
+                </a> 
+                {% if not user.userprofile.portfolio_link %}<span class="text-gray-500">(Not provided)</span>{% endif %}
+            </li>
+        </ul>
+    </div>
+
+    <hr class="my-4 border-gray-600">
+
+    <button class="w-full py-2 bg-blue-500 rounded hover:bg-blue-600">Refresh Stats</button>
+
+    <a href="{% url 'edit_profile' %}" class="block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded text-center mt-4">
+        Edit Profile
+    </a>
+</div>

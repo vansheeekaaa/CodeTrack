@@ -1,13 +1,13 @@
 from django.urls import path, include
-from django.contrib.auth import views as auth_views
-from . import views
+from . import views  # Import views from the same app
 
 urlpatterns = [
-    path('accounts/signup/', views.signup, name='signup'),  
-    path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
-    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),  # Logout route
-    path('accounts/password-reset/', auth_views.PasswordResetView.as_view(template_name='registration/password_reset.html'), name='password_reset'),
-    
-    # Google OAuth
-    path('accounts/', include('allauth.urls')),  # allauth handles social logins automatically
+    path("", views.dashboard, name="dashboard"),  # Homepage
+    path("login/", views.user_login, name="login"),
+    path("signup/", views.signup, name="signup"),
+    path("logout/", views.user_logout, name="logout"),
+    path("edit-profile/", views.edit_profile, name="edit_profile"),
+    # For social authentication (Google login)
+    path("accounts/", include("allauth.urls")),
+    path("dashboard/", views.dashboard, name="dashboard"),
 ]
