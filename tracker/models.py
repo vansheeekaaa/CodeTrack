@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from datetime import datetime, timedelta
+from datetime import datetime
 
 # Default function for cumulative_stats
 def default_cumulative_stats():
@@ -37,6 +37,15 @@ class UserStats(models.Model):
     def __str__(self):
         return f"Stats for {self.user.user.username}"
 
+    def reset_stats(self):
+        """Resets all stats to zero before fetching new data."""
+        self.cumulative_stats = default_cumulative_stats()
+        self.heatmap_data = default_heatmap_data()
+        self.total_solved = 0
+        self.max_streak = 0
+        self.current_streak = 0
+        self.save()
+
     def update_streaks(self):
         """Updates the current streak and max streak based on heatmap_data."""
         dates = sorted(self.heatmap_data.keys())
@@ -57,9 +66,13 @@ class UserStats(models.Model):
 
             prev_date = dt
 
-        # Ensure today's activity counts in streaks
+        # ✅ Ensure today's activity counts in streaks
         if today.strftime("%Y-%m-%d") in self.heatmap_data:
-            current_streak += 1
+            if prev_date is None or (today - prev_date).days <= 1:
+                current_streak += 1
+            else:
+                max_streak = max(max_streak, current_streak)
+                current_streak = 1  # Reset for today
 
         self.current_streak = current_streak
         self.max_streak = max(max_streak, current_streak)
@@ -75,18 +88,41 @@ class UserStats(models.Model):
         self.heatmap_data[submission_date] = self.heatmap_data.get(submission_date, 0) + count
         self.save()
 
-    def update_cumulative_stats(self, stats):
+    def update_cumulative_stats(self, new_stats):
         """
         Updates cumulative stats with new values.
-        stats = {"Easy": x, "Medium": y, "Hard": z, "Total": t, "Topics": {...}}
+        If the API provides absolute values, we replace them instead of adding.
         """
         for key in ["Easy", "Medium", "Hard", "Total"]:
-            if key in stats:
-                self.cumulative_stats[key] = self.cumulative_stats.get(key, 0) + stats[key]
+            if key in new_stats:
+                if new_stats[key] >= self.cumulative_stats.get(key, 0):
+                    self.cumulative_stats[key] = new_stats[key]  # Replace with latest API value
+                else:
+                    # If new value is somehow lower, assume it's an error and keep the higher one
+                    self.cumulative_stats[key] = max(self.cumulative_stats[key], new_stats[key])
 
-        # Updating topics
-        if "Topics" in stats:
-            for topic, count in stats["Topics"].items():
+        # ✅ Safely updating topic-wise stats
+        if "Topics" in new_stats:
+            if "Topics" not in self.cumulative_stats:
+                self.cumulative_stats["Topics"] = {}
+            for topic, count in new_stats["Topics"].items():
                 self.cumulative_stats["Topics"][topic] = self.cumulative_stats["Topics"].get(topic, 0) + count
 
         self.save()
+
+    def update_from_platform(self, new_data):
+        """
+        Updates all user stats from a given platform's data.
+        """
+        if not new_data:
+            return
+
+        self.update_cumulative_stats(new_data)
+        
+        # ✅ Update heatmap
+        if "Heatmap" in new_data:
+            for date, count in new_data["Heatmap"].items():
+                self.update_heatmap(date, count)
+
+        self.update_streaks()
+        self.update_total_solved()

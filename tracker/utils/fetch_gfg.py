@@ -1,7 +1,6 @@
 import requests
 import json
 from datetime import datetime
-from tracker.models import UserStats, UserProfile
 
 def debug_print_structure(data, label):
     """Helper function to print data structure in a readable format."""
@@ -30,18 +29,21 @@ def fetch_gfg_data(username):
 
         debug_print_structure(user_submissions, "User Submissions")
 
-        # ✅ Extracting difficulty counts by counting problems under each difficulty key
+        # ✅ Extracting difficulty counts
         difficulty_counts = {
-            "easy": len(user_submissions.get("Easy", {})),  
-            "medium": len(user_submissions.get("Medium", {})),  
-            "hard": len(user_submissions.get("Hard", {})),  
+            "Easy": len(user_submissions.get("Easy", {})),  
+            "Medium": len(user_submissions.get("Medium", {})),  
+            "Hard": len(user_submissions.get("Hard", {})),  
+            "Total": sum(len(user_submissions.get(difficulty, {})) for difficulty in ["Easy", "Medium", "Hard"])
         }
 
+        # ✅ Extracting streak info
         streak_info = {
             "currentStreak": user_info.get("currentStreak", 0),
             "maxStreak": user_info.get("maxStreak", 0),
         }
 
+        # ✅ Formatting heatmap data
         formatted_heatmap = {
             datetime.utcfromtimestamp(int(timestamp)).strftime("%Y-%m-%d"): count
             for timestamp, count in heatmap_data.items()
@@ -50,38 +52,11 @@ def fetch_gfg_data(username):
 
         debug_print_structure(formatted_heatmap, "Formatted Heatmap Data")
 
-        user_profile = UserProfile.objects.filter(user__username=username).first()
-        if not user_profile:
-            return {
-                "warning": "User profile not found in the database. Returning fetched data without saving.",
-                "totalProblemsSolved": user_info.get("total_problems_solved", 0),
-                "difficultyCounts": difficulty_counts,
-                "heatmap": formatted_heatmap,
-                "streakInfo": streak_info
-            }
-
-        user_stats, created = UserStats.objects.get_or_create(user=user_profile)
-        user_stats.cumulative_stats["easy"] = difficulty_counts["easy"]
-        user_stats.cumulative_stats["medium"] = difficulty_counts["medium"]
-        user_stats.cumulative_stats["hard"] = difficulty_counts["hard"]
-        user_stats.total_solved = user_info.get("total_problems_solved", 0)
-
-        for date, count in formatted_heatmap.items():
-            user_stats.heatmap_data[date] = user_stats.heatmap_data.get(date, 0) + count
-
-        user_stats.current_streak = streak_info["currentStreak"]
-        user_stats.max_streak = max(user_stats.max_streak, streak_info["maxStreak"])
-        user_stats.save()
-
         return {
-            "success": "Data successfully updated for the user",
-            "totalProblemsSolved": user_stats.total_solved,
-            "difficultyCounts": user_stats.cumulative_stats,
-            "heatmap": user_stats.heatmap_data,
-            "streakInfo": {
-                "currentStreak": user_stats.current_streak,
-                "maxStreak": user_stats.max_streak
-            }
+            "success": True,
+            "difficultyCounts": difficulty_counts,
+            "heatmap": formatted_heatmap,
+            "streakInfo": streak_info
         }
 
     except (KeyError, requests.exceptions.RequestException, ValueError) as e:
