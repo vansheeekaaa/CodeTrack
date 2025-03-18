@@ -1,41 +1,71 @@
 import requests
 from datetime import datetime
 
-LEETCODE_STATS_API = "https://leetcode-stats-api.herokuapp.com/{}"
+LEETCODE_GRAPHQL_URL = "https://leetcode.com/graphql"
+
+GRAPHQL_QUERY = {
+    "query": """
+    query getUserProfile($username: String!) {
+      matchedUser(username: $username) {
+        username
+        submitStatsGlobal {
+          acSubmissionNum {
+            difficulty
+            count
+          }
+        }
+        submissionCalendar
+      }
+    }
+    """,
+    "variables": {}
+}
 
 def fetch_leetcode_data(username):
     if not username:
         return {"error": "No username provided"}
-
-    response = requests.get(LEETCODE_STATS_API.format(username))
+    
+    GRAPHQL_QUERY["variables"] = {"username": username}
+    response = requests.post(LEETCODE_GRAPHQL_URL, json=GRAPHQL_QUERY)
+    
     if response.status_code != 200:
         return {"error": "Failed to fetch LeetCode data"}
-
+    
     try:
         data = response.json()
-        if not data or "totalSolved" not in data:
-            return {"error": "Invalid LeetCode API response"}
-
-        # Extracting stats
+        user_data = data.get("data", {}).get("matchedUser", {})
+        
+        if not user_data:
+            return {"error": "Invalid LeetCode username or API response"}
+        
+        submissions = user_data.get("submitStatsGlobal", {}).get("acSubmissionNum", [])
+        difficulty_counts = {difficulty["difficulty"]: difficulty["count"] for difficulty in submissions}
+        
+        # Ensure we have default values
         difficulty_counts = {
-            "Easy": data.get("easySolved", 0),
-            "Medium": data.get("mediumSolved", 0),
-            "Hard": data.get("hardSolved", 0),
-            "Total": data.get("totalSolved", 0),
+            "Easy": difficulty_counts.get("Easy", 0),
+            "Medium": difficulty_counts.get("Medium", 0),
+            "Hard": difficulty_counts.get("Hard", 0),
+            "Total": difficulty_counts.get("All", 0),
         }
-
-        # Extracting heatmap data
+        
+        # Extract heatmap data
         heatmap_data = {}
-        if "submissionCalendar" in data and isinstance(data["submissionCalendar"], dict):
-            for timestamp, count in data["submissionCalendar"].items():
+        submission_calendar = user_data.get("submissionCalendar", {})
+        if isinstance(submission_calendar, str):
+            import json
+            submission_calendar = json.loads(submission_calendar)
+        
+        if isinstance(submission_calendar, dict):
+            for timestamp, count in submission_calendar.items():
                 submission_date = datetime.utcfromtimestamp(int(timestamp)).strftime("%Y-%m-%d")
                 heatmap_data[submission_date] = count
-
+        
         return {
             "success": True,
             "difficultyCounts": difficulty_counts,
-            "heatmap": heatmap_data,
+            "heatmap": heatmap_data
         }
-
+    
     except Exception as e:
         return {"error": f"Unexpected error: {str(e)}"}
