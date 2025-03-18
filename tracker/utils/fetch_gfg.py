@@ -1,14 +1,5 @@
 import requests
-import json
 from datetime import datetime
-
-def debug_print_structure(data, label):
-    """Helper function to print data structure in a readable format."""
-    print(f"\n===== DEBUG: {label} =====")
-    try:
-        print(json.dumps(data, indent=4))
-    except TypeError:
-        print(data)
 
 def fetch_gfg_data(username):
     if not username:
@@ -27,14 +18,12 @@ def fetch_gfg_data(username):
         user_submissions = user_data["pageProps"].get("userSubmissionsInfo", {})
         heatmap_data = user_data["pageProps"].get("heatMapData", {}).get("result", {})
 
-        debug_print_structure(user_submissions, "User Submissions")
-
-        # ✅ Extracting difficulty counts
+        # ✅ Extracting difficulty counts with correct list handling
         difficulty_counts = {
-            "Easy": len(user_submissions.get("Easy", {})),  
-            "Medium": len(user_submissions.get("Medium", {})),  
-            "Hard": len(user_submissions.get("Hard", {})),  
-            "Total": sum(len(user_submissions.get(difficulty, {})) for difficulty in ["Easy", "Medium", "Hard"])
+            "Easy": len(user_submissions.get("easy", [])),  
+            "Medium": len(user_submissions.get("medium", [])),  
+            "Hard": len(user_submissions.get("hard", [])),  
+            "Total": sum(len(user_submissions.get(difficulty, [])) for difficulty in ["easy", "medium", "hard"])
         }
 
         # ✅ Extracting streak info
@@ -43,14 +32,14 @@ def fetch_gfg_data(username):
             "maxStreak": user_info.get("maxStreak", 0),
         }
 
-        # ✅ Formatting heatmap data
-        formatted_heatmap = {
-            datetime.utcfromtimestamp(int(timestamp)).strftime("%Y-%m-%d"): count
-            for timestamp, count in heatmap_data.items()
-            if timestamp.isdigit()
-        }
-
-        debug_print_structure(formatted_heatmap, "Formatted Heatmap Data")
+        # ✅ Formatting heatmap data (Only convert timestamps if needed)
+        if all(k.isdigit() for k in heatmap_data.keys()):  
+            formatted_heatmap = {
+                datetime.utcfromtimestamp(int(timestamp)).strftime("%Y-%m-%d"): count
+                for timestamp, count in heatmap_data.items()
+            }
+        else:
+            formatted_heatmap = heatmap_data  # Already formatted, use as-is
 
         return {
             "success": True,

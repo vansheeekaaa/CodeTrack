@@ -13,6 +13,13 @@ from .utils.fetch_gfg import fetch_gfg_data
 def extract_username(url):
     return url.rstrip("/").split("/")[-1] if url else None
 
+def merge_heatmaps(*heatmaps):
+    merged_heatmap = {}
+    for heatmap in heatmaps:
+        for date, count in heatmap.items():
+            merged_heatmap[date] = merged_heatmap.get(date, 0) + count
+    return merged_heatmap
+
 @login_required
 def dashboard(request):
     user_profile = UserProfile.objects.filter(user=request.user).first()
@@ -71,7 +78,10 @@ def edit_profile(request):
                 "Hard": leetcode_data.get("difficultyCounts", {}).get("Hard", 0) + gfg_data.get("difficultyCounts", {}).get("Hard", 0),
                 "Total": leetcode_data.get("difficultyCounts", {}).get("Total", 0) + gfg_data.get("difficultyCounts", {}).get("Total", 0),
                 "Topics": {},  # If topic-wise data is available, merge here
-                "Heatmap": {**leetcode_data.get("Heatmap", {}), **gfg_data.get("Heatmap", {})},
+                "Heatmap": merge_heatmaps(
+                    leetcode_data.get("heatmap", {}),
+                    gfg_data.get("heatmap", {})
+                ),
             }
 
             # ✅ Update user stats properly
