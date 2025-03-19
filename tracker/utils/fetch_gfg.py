@@ -5,7 +5,8 @@ def fetch_gfg_data(username):
     if not username:
         return {"error": "No username provided"}
 
-    BASE_URL = f'https://www.geeksforgeeks.org/gfg-assets/_next/data/uzOsUDDSPOvoyjJor0I_p/user/{username}.json'
+    # ✅ Fetch general profile data
+    BASE_URL = f'https://geeks-for-geeks-api.vercel.app/{username}'
     headers = {"User-Agent": "Mozilla/5.0"}
 
     response = requests.get(BASE_URL, headers=headers)
@@ -14,38 +15,41 @@ def fetch_gfg_data(username):
 
     try:
         user_data = response.json()
-        user_info = user_data["pageProps"].get("userInfo", {})
-        user_submissions = user_data["pageProps"].get("userSubmissionsInfo", {})
-        heatmap_data = user_data["pageProps"].get("heatMapData", {}).get("result", {})
+        user_info = user_data.get("info", {})
 
-        # ✅ Extracting difficulty counts with correct list handling
         difficulty_counts = {
-            "Easy": len(user_submissions.get("easy", [])),  
-            "Medium": len(user_submissions.get("medium", [])),  
-            "Hard": len(user_submissions.get("hard", [])),  
-            "Total": sum(len(user_submissions.get(difficulty, [])) for difficulty in ["easy", "medium", "hard"])
+            "Easy": user_data.get("solvedStats", {}).get("easy", {}).get("count", 0),
+            "Medium": user_data.get("solvedStats", {}).get("medium", {}).get("count", 0),
+            "Hard": user_data.get("solvedStats", {}).get("hard", {}).get("count", 0),
+            "Total": user_info.get("totalProblemsSolved", 0),
         }
 
-        # ✅ Extracting streak info
         streak_info = {
             "currentStreak": user_info.get("currentStreak", 0),
             "maxStreak": user_info.get("maxStreak", 0),
         }
 
-        # ✅ Formatting heatmap data (Only convert timestamps if needed)
-        if all(k.isdigit() for k in heatmap_data.keys()):  
-            formatted_heatmap = {
-                datetime.utcfromtimestamp(int(timestamp)).strftime("%Y-%m-%d"): count
-                for timestamp, count in heatmap_data.items()
-            }
-        else:
-            formatted_heatmap = heatmap_data  # Already formatted, use as-is
+        # ✅ Fetch submission heatmap data
+        heatmap_url = "https://practiceapi.geeksforgeeks.org/api/v1/user/problems/submissions/"
+        heatmap_payload = {
+            "handle": username,
+            "requestType": "getYearwiseUserSubmissions",
+            "year": datetime.now().year,
+            "month": ""  # Fetching all months of the year
+        }
+
+        heatmap_response = requests.post(heatmap_url, headers={
+            "User-Agent": "Mozilla/5.0",
+            "Referer": "https://practice.geeksforgeeks.org/",
+            "Content-Type": "application/json"
+        }, json=heatmap_payload)
+
+        heatmap_data = heatmap_response.json() if heatmap_response.status_code == 200 else {}
 
         return {
-            "success": True,
             "difficultyCounts": difficulty_counts,
-            "heatmap": formatted_heatmap,
-            "streakInfo": streak_info
+            "streakInfo": streak_info,
+            "heatmap": heatmap_data.get("result", {})  # Store submission heatmap data
         }
 
     except (KeyError, requests.exceptions.RequestException, ValueError) as e:
