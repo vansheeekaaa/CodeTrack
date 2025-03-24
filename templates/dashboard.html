@@ -1,46 +1,67 @@
 {% include 'sidebar.html' %}
-
 <h2>Welcome to Your Dashboard!</h2>
-<p>You are logged in as {{ user.username }}</p>
-
+<p>You are logged in as <strong>{{ user.username }}</strong></p>
 <a href="{% url 'logout' %}">Logout</a>
 
-<h2>Cumulative Stats</h2>
+<!-- DSA Stats Section -->
+<h2>Coding Stats</h2>
 {% if user_stats and user_stats.cumulative_stats %}
-    <p>Total Problems Solved: {{ user_stats.cumulative_stats.Total }}</p>
-    <p>Easy: {{ user_stats.cumulative_stats.Easy }}</p>
-    <p>Medium: {{ user_stats.cumulative_stats.Medium }}</p>
-    <p>Hard: {{ user_stats.cumulative_stats.Hard }}</p>
-    
-    {% if user_stats.cumulative_stats.Topics %}
-        <p>Topic-wise:</p>
-        <ul>
-            {% for topic, count in user_stats.cumulative_stats.Topics.items %}
-                <li>{{ topic }}: {{ count }}</li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No topic-wise data available.</p>
-    {% endif %}
+<p><strong>Total Problems Solved:</strong> {{ user_stats.cumulative_stats.Total|default:0 }}</p>
+<p><strong>Easy:</strong> {{ user_stats.cumulative_stats.Easy|default:0 }}</p>
+<p><strong>Medium:</strong> {{ user_stats.cumulative_stats.Medium|default:0 }}</p>
+<p><strong>Hard:</strong> {{ user_stats.cumulative_stats.Hard|default:0 }}</p>
+ {% if user_stats.cumulative_stats.Topics %}
+<h3>Topic-wise Distribution:</h3>
+<ul>
+ {% for topic, count in user_stats.cumulative_stats.Topics.items %}
+<li><strong>{{ topic }}:</strong> {{ count }}</li>
+ {% endfor %}
+</ul>
+ {% else %}
+<p>No topic-wise data available.</p>
+ {% endif %}
 {% else %}
-    <p>No data found.</p>
+<p>No coding data found.</p>
 {% endif %}
 
+<!-- Activity Heatmap Section -->
 <h2>Activity Heatmap</h2>
 {% if user_stats and user_stats.heatmap_data %}
-    <ul>
-        {% for date, solved in user_stats.heatmap_data.items %}
-            <li>{{ date }}: {{ solved }} problems</li>
-        {% endfor %}
-    </ul>
+<ul>
+ {% for date, solved in user_stats.heatmap_data.items %}
+<li>{{ date }}: {{ solved }} problems</li>
+ {% endfor %}
+</ul>
 {% else %}
-    <p>No data found.</p>
+<p>No heatmap data found.</p>
 {% endif %}
 
+<!-- Streaks Section -->
 <h2>Streaks</h2>
 {% if user_stats and user_stats.current_streak is not None %}
-    <p>Current Streak: {{ user_stats.current_streak }} days</p>
-    <p>Max Streak: {{ user_stats.max_streak }} days</p>
+<p><strong>Current Streak:</strong> {{ user_stats.current_streak }} days</p>
+<p><strong>Max Streak:</strong> {{ user_stats.max_streak }} days</p>
 {% else %}
-    <p>No data found.</p>
+<p>No streak data found.</p>
+{% endif %}
+
+<!-- GitHub Stats Section -->
+<h2>GitHub Stats</h2>
+{% if github_stats %}
+<p><strong>Repositories:</strong> {{ github_stats.repo_count|default:0 }}</p>
+<p><strong>Followers:</strong> {{ github_stats.follower_count|default:0 }}</p>
+<p><strong>Following:</strong> {{ github_stats.following_count|default:0 }}</p>
+<p><strong>Total Contributions:</strong> {{ github_stats.total_contributions|default:0 }}</p>
+<h3>GitHub Contribution Heatmap</h3>
+ {% if github_stats.contribution_heatmap %}
+<ul>
+ {% for date, contributions in github_stats.contribution_heatmap.items %}
+<li>{{ date }}: {{ contributions }} contributions</li>
+ {% endfor %}
+</ul>
+ {% else %}
+<p>No contribution data found.</p>
+ {% endif %}
+{% else %}
+<p>No GitHub data available.</p>
 {% endif %}

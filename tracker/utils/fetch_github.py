@@ -1,32 +1,87 @@
+import os
 import requests
 
 def fetch_github_data(username):
-    base_url = f"https://api.github.com/users/{username}"
+    # Load GitHub token from environment variable
+    token = os.getenv("GITHUB_TOKEN")
+        
+    if not token:
+        return {"error": "GitHub token not found. Please set the token in the environment."}
 
-    # Making requests to GitHub API
-    repos_url = f"{base_url}/repos"
-    followers_url = f"{base_url}/followers"
-    following_url = f"{base_url}/following"
+    # Set the GraphQL API endpoint
+    url = "https://api.github.com/graphql"
+    
+    # GraphQL query to fetch data
+    query = """
+    query($userName: String!) {
+      user(login: $userName) {
+        repositories(first: 100) {
+          totalCount
+        }
+        followers {
+          totalCount
+        }
+        following {
+          totalCount
+        }
+        contributionsCollection {
+          contributionCalendar {
+            totalContributions
+            weeks {
+              contributionDays {
+                contributionCount
+                date
+              }
+            }
+          }
+        }
+      }
+    }
+    """
+    
+    # GraphQL variables
+    variables = {"userName": username}
+
+    # Set the request headers with the token
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
 
     try:
-        repos_response = requests.get(repos_url)
-        followers_response = requests.get(followers_url)
-        following_response = requests.get(following_url)
+        # Make the POST request to GitHub GraphQL API
+        response = requests.post(url, json={"query": query, "variables": variables}, headers=headers)
 
-        # Check if responses are successful
-        if repos_response.status_code == 200 and followers_response.status_code == 200 and following_response.status_code == 200:
-            # Get the counts from the JSON response
-            repo_count = len(repos_response.json())
-            follower_count = len(followers_response.json())
-            following_count = len(following_response.json())
+        # Check if response is successful
+        if response.status_code == 200:
+            data = response.json()
+            user_data = data["data"]["user"]
 
-            # Return stats in a dictionary
+            # Get counts for repositories, followers, and following
+            repo_count = user_data["repositories"]["totalCount"]
+            follower_count = user_data["followers"]["totalCount"]
+            following_count = user_data["following"]["totalCount"]
+
+            # Extract contribution heatmap data
+            contributions = {}
+            total_contributions = user_data["contributionsCollection"]["contributionCalendar"]["totalContributions"]
+            weeks = user_data["contributionsCollection"]["contributionCalendar"]["weeks"]
+
+            for week in weeks:
+                for day in week["contributionDays"]:
+                    date = day["date"]
+                    contribution_count = day["contributionCount"]
+                    if contribution_count > 0:
+                        contributions[date] = contribution_count
+
             return {
                 "repoCount": repo_count,
                 "followerCount": follower_count,
-                "followingCount": following_count
+                "followingCount": following_count,
+                "heatmap": contributions,
+                "totalContributions": total_contributions
             }
         else:
-            return {"error": "Failed to fetch GitHub stats. Please check the username."}
+            return {"error": "Failed to fetch data from GitHub GraphQL API. Please check the username or token."}
     except Exception as e:
         return {"error": f"Error fetching data: {str(e)}"}
