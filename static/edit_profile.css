@@ -1,0 +1,75 @@
+/* 🌟 Profile Page Styles */
+
+.container {
+    max-width: 800px;
+    margin: 100px auto 50px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+}
+
+.title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #00b4d8;
+    margin-bottom: 20px;
+}
+
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+@media (min-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    font-weight: 600;
+    color: white;
+    margin-bottom: 5px;
+}
+
+.help-text {
+    font-size: 12px;
+    color: #90e0ef;
+}
+
+.error-text {
+    font-size: 14px;
+    color: #ff4d4d;
+}
+
+.save-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: #00b4d8;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.save-btn:hover {
+    background: #0077b6;
+    transform: scale(1.05);
+}

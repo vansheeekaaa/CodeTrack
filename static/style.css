@@ -1,0 +1,174 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #0a192f, #021024);
+    color: white;
+}
+
+/* 🔹 Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* 🔹 Header (Navbar) */
+.header {
+    display: flex;
+    /*! justify-content: space-between; */ /* Keeps logo on left, nav on right */
+    align-items: center;
+    padding: 20px 50px;
+    background: rgba(0, 10, 20, 0.9);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    left: 0;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #00b4d8;
+}
+
+/* 🔹 Navbar Links */
+nav {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* 🔥 Ensures spacing between links */
+    flex-wrap: wrap; /* ✅ Prevents links from being hidden */
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    transition: 0.3s ease-in-out;
+    white-space: nowrap; /* ✅ Prevents breaking into multiple lines */
+}
+
+nav a:hover {
+    color: #00b4d8;
+}
+
+/* 🔹 Mobile Responsive Navbar */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: center;
+        padding: 15px;
+    }
+
+    nav {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+}
+
+/* 🔹 Hero Section */
+.hero {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #001f3f, #012a4a);
+    animation: fadeIn 1.5s ease-in;
+}
+
+.hero-title {
+    font-size: 52px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #00b4d8;
+}
+
+.hero-subtitle {
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: #90e0ef;
+}
+
+/* 🔹 CTA (Call to Action) Button */
+.cta {
+    display: inline-block;
+    padding: 14px 30px;
+    font-size: 20px;
+    background: linear-gradient(45deg, #00b4d8, #0077b6);
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow: 0 5px 10px rgba(0, 180, 216, 0.3);
+    transition: all 0.3s ease-in-out;
+}
+
+.cta:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 15px rgba(0, 180, 216, 0.5);
+}
+
+/* 🔹 Features Section */
+.features, .how-it-works {
+    padding: 80px 50px;
+    text-align: center;
+    background: #012a4a;
+}
+
+.feature-grid, .steps {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+/* 🔹 Feature & Steps Cards */
+.feature-box, .step-box {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    transition: transform 0.3s ease-in-out, background 0.3s ease-in-out;
+    border: 1px solid #00b4d8;
+    text-align: center;
+}
+
+.feature-box:hover, .step-box:hover {
+    transform: scale(1.1); /* 🔥 Smooth Zoom-In Effect */
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* 🔹 Footer */
+.footer {
+    text-align: center;
+    padding: 20px;
+    background: rgba(0, 10, 20, 0.9);
+}
+
+.footer a {
+    color: #90e0ef;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+
+/* 🔹 Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes backgroundAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}

@@ -1,0 +1,85 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeTrack - Track Your Coding Progress</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+
+    <!-- 🏠 Header Section -->
+    <header class="header">
+        <h1 class="logo">CodeTrack</h1>
+        <nav>
+            <a href="#features">Features</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}">Dashboard</a>
+                <a href="{% url 'logout' %}">Logout</a>
+                <a href="{% url 'profile' %}">Profile</a>  {# Replaced profile picture with "Profile" text #}
+            {% else %}
+                <a href="{% url 'login' %}" class="login-btn">Login</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <!-- 🚀 Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h2 class="hero-title">Track. Analyze. Improve.</h2>
+            <p class="hero-subtitle">Unify your coding activity across LeetCode, GitHub, and GFG in one powerful dashboard.</p>
+            <a href="/signup" class="cta">Get Started</a>
+        </div>
+    </section>
+
+    <!-- ⚡ Features Section -->
+    <section id="features" class="features">
+        <h2>Why CodeTrack?</h2>
+        <div class="feature-grid">
+            <div class="feature-box">
+                <h3>📊 Track Progress</h3>
+                <p>See your coding streaks, heatmaps, and submissions.</p>
+            </div>
+            <div class="feature-box">
+                <h3>🔗 Multi-Platform</h3>
+                <p>Sync LeetCode, GitHub, and GFG in one dashboard.</p>
+            </div>
+            <div class="feature-box">
+                <h3>📈 Visual Insights</h3>
+                <p>Analyze your growth with charts and stats.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 🛠 How It Works -->
+    <section class="how-it-works">
+        <h2>How CodeTrack Works?</h2>
+        <div class="steps">
+            <div class="step-box">
+                <h4>Step 1: Sign Up</h4>
+                <p>Create your account to start tracking.</p>
+            </div>
+            <div class="step-box">
+                <h4>Step 2: Link Your Profiles</h4>
+                <p>Sync your LeetCode, GitHub, and GFG accounts.</p>
+            </div>
+            <div class="step-box">
+                <h4>Step 3: Monitor & Improve</h4>
+                <p>Track progress, analyze trends, and boost consistency.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 📩 Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 CodeTrack. All Rights Reserved.</p>
+        <div>
+            <a href="/about">About</a> | 
+            <a href="/contact">Contact</a>
+        </div>
+    </footer>
+
+</body>
+</html>

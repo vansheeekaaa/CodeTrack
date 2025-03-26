@@ -12,7 +12,6 @@
 </head>
 <body>
 
-    <!-- 🏠 Header Section -->
     <header class="header">
         <h1 class="logo">CodeTrack</h1>
         <nav>
@@ -21,18 +20,12 @@
         </nav>
     </header>
 
-    <!-- 🔑 Login Form -->
     <div class="login-container">
         <h2 class="login-title">Login</h2>
 
         <form method="post" class="login-form">
             {% csrf_token %}
-            
-            <label class="label">Email:</label>
-            <input type="email" name="login" required class="input-field">
-
-            <label class="label">Password:</label>
-            <input type="password" name="password" required class="input-field">
+            {{ form.as_p }}
 
             <button type="submit" class="login-btn">Login</button>
         </form>
@@ -41,7 +34,6 @@
             <a href="{% url 'account_signup' %}" class="link">Sign up</a>
         </p>
 
-        <!-- 🟢 Google Login -->
         <a href="{% provider_login_url 'google' %}" class="google-login">Login with Google</a>
 
         <p class="forgot-password">
@@ -49,7 +41,6 @@
         </p>
     </div>
 
-    <!-- 📩 Footer -->
     <footer class="footer">
         <p>&copy; 2025 CodeTrack. All Rights Reserved.</p>
     </footer>

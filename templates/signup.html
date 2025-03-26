@@ -1,18 +1,62 @@
-<h2>Sign Up</h2>
+{% load static %}
+{% load socialaccount %}
 
-{% if error %}
-    <p style="color: red;">{{ error }}</p>
-{% endif %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - CodeTrack</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'signup.css' %}">
+</head>
+<body>
 
-<form method="post">
-    {% csrf_token %}
-    
-    <label>Email:</label>
-    <input type="email" name="email" required>
+    <!-- 🏠 Header Section -->
+    <header class="header">
+        <h1 class="logo">CodeTrack</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="{% url 'login' %}">Login</a>
+        </nav>
+    </header>
 
-    {{ form.as_p }}
+    <!-- 📝 Signup Form -->
+    <div class="signup-container">
+        <h2 class="signup-title">Sign Up</h2>
 
-    <button type="submit">Sign Up</button>
-</form>
+        {% if error %}
+            <p class="error-message">{{ error }}</p>
+        {% endif %}
 
-<p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
+        <form method="post" class="signup-form">
+            {% csrf_token %}
+            
+            <label class="label">Email:</label>
+            <input type="email" name="email" required class="input-field">
+
+            {{ form.as_p }}
+
+            <button type="submit" class="signup-btn">Sign Up</button>
+        </form>
+
+        <!-- Google Sign Up -->
+        <div class="google-auth">
+            <p>or</p>
+            <a href="{% provider_login_url 'google' %}" class="google-btn">
+                <img src="{% static 'google-icon.png' %}" alt="Google Logo"> Sign Up with Google
+            </a>
+        </div>
+
+        <p class="login-text">Already have an account? 
+            <a href="{% url 'login' %}" class="link">Login</a>
+        </p>
+    </div>
+
+    <!-- 📩 Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 CodeTrack. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>

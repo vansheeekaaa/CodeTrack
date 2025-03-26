@@ -12,6 +12,9 @@ from .utils.fetch_leetcode import fetch_leetcode_data
 from .utils.fetch_gfg import fetch_gfg_data
 from collections import Counter
 
+def home(request):
+    return render(request, "index.html")
+  
 def extract_username(url):
     """Extracts username from a profile URL."""
     return url.rstrip("/").split("/")[-1] if url else None

@@ -1,0 +1,61 @@
+{% load static %}
+{% load socialaccount %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - CodeTrack</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'login.css' %}">
+</head>
+<body>
+
+    <!-- 🏠 Header -->
+    <header class="header">
+        <h1 class="logo">CodeTrack</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="{% url 'account_login' %}">Login</a>
+        </nav>
+    </header>
+
+    <!-- 📝 Signup Form -->
+    <div class="login-container">
+        <h2 class="login-title">Sign Up</h2>
+
+        <form method="post" class="login-form">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                        <small class="error-text">{{ field.errors }}</small>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="login-btn">Sign Up</button>
+        </form>
+
+        <!-- 🟢 Google Signup -->
+        <a href="{% provider_login_url 'google' %}" class="google-login">Sign Up with Google</a>
+
+        <p class="signup-text">Already have an account? 
+            <a href="{% url 'account_login' %}" class="link">Login here</a>
+        </p>
+    </div>
+
+    <!-- 📩 Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 CodeTrack. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>
