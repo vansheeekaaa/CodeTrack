@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import json
 import logging
 from django.shortcuts import render, redirect
@@ -10,7 +11,7 @@ from .models import UserProfile, UserStats, GitHubStats
 from .forms import UserProfileForm
 from .utils.fetch_leetcode import fetch_leetcode_data
 from .utils.fetch_gfg import fetch_gfg_data
-from collections import Counter
+from collections import Counter, defaultdict
 
 def home(request):
     return render(request, "index.html")
@@ -39,10 +40,46 @@ def dashboard(request):
     user_stats = UserStats.objects.filter(user=user_profile).first()
     github_stats = GitHubStats.objects.filter(user=user_profile).first()
 
+    # Prepare date range (last 6 months)
+    today = datetime.now().date()
+    heatmap_dates = [today - timedelta(days=i) for i in range(180)]
+
+    # Coding Activity Heatmap (LeetCode + GFG)
+    coding_heatmap = defaultdict(int)
+    if user_stats and user_stats.heatmap_data:
+        for date_str, count in user_stats.heatmap_data.items():
+            try:
+                date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+                coding_heatmap[date_obj] = count
+            except ValueError:
+                continue
+
+    # GitHub Contributions Heatmap
+    github_heatmap = defaultdict(int)
+    if github_stats and github_stats.contribution_heatmap:
+        for date_str, count in github_stats.contribution_heatmap.items():
+            try:
+                date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+                github_heatmap[date_obj] = count
+            except ValueError:
+                continue
+
+    # Group dates by month for both heatmaps
+    def group_by_month(dates):
+        months = defaultdict(list)
+        for date in dates:
+            month_key = date.strftime("%Y-%m")
+            months[month_key].append(date)
+        return dict(sorted(months.items(), reverse=True))  # Newest first
+
     context = {
         "user": user,
-        "user_stats": user_stats if user_stats else None,
-        "github_stats": github_stats if github_stats else None
+        "user_stats": user_stats,
+        "github_stats": github_stats,
+        "coding_months": group_by_month(heatmap_dates),
+        "github_months": group_by_month(heatmap_dates),
+        "coding_heatmap": coding_heatmap,
+        "github_heatmap": github_heatmap,
     }
     return render(request, "dashboard.html", context)
 

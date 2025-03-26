@@ -1,67 +1,249 @@
-{% include 'sidebar.html' %}
-<h2>Welcome to Your Dashboard!</h2>
-<p>You are logged in as <strong>{{ user.username }}</strong></p>
-<a href="{% url 'logout' %}">Logout</a>
+{% load static %}
+{% load get_item %}
 
-<!-- DSA Stats Section -->
-<h2>Coding Stats</h2>
-{% if user_stats and user_stats.cumulative_stats %}
-<p><strong>Total Problems Solved:</strong> {{ user_stats.cumulative_stats.Total|default:0 }}</p>
-<p><strong>Easy:</strong> {{ user_stats.cumulative_stats.Easy|default:0 }}</p>
-<p><strong>Medium:</strong> {{ user_stats.cumulative_stats.Medium|default:0 }}</p>
-<p><strong>Hard:</strong> {{ user_stats.cumulative_stats.Hard|default:0 }}</p>
- {% if user_stats.cumulative_stats.Topics %}
-<h3>Topic-wise Distribution:</h3>
-<ul>
- {% for topic, count in user_stats.cumulative_stats.Topics.items %}
-<li><strong>{{ topic }}:</strong> {{ count }}</li>
- {% endfor %}
-</ul>
- {% else %}
-<p>No topic-wise data available.</p>
- {% endif %}
-{% else %}
-<p>No coding data found.</p>
-{% endif %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeTrack - Dashboard</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'dashboard.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* GitHub-style Heatmap Styles */
+        .github-heatmap {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+        
+        .month-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .month-label {
+            font-size: 0.7rem;
+            color: #586069;
+            margin-bottom: 5px;
+        }
+        
+        .month-grid {
+            display: grid;
+            grid-template-rows: repeat(7, 12px);
+            grid-auto-flow: column;
+            grid-auto-columns: 12px;
+            gap: 3px;
+        }
+        
+        .heatmap-cell {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            position: relative;
+        }
+        
+        .heatmap-cell.color-0 { background-color: #ebedf0; }
+        .heatmap-cell.color-1 { background-color: #9be9a8; }
+        .heatmap-cell.color-2 { background-color: #40c463; }
+        .heatmap-cell.color-3 { background-color: #30a14e; }
+        .heatmap-cell.color-4 { background-color: #216e39; }
+        
+        .heatmap-cell:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    {% include 'sidebar.html' %}
+    
+    <main class="dashboard-container">
+        <h2>Welcome to Your Dashboard, <strong>{{ user.username }}</strong>!</h2>
+        <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
 
-<!-- Activity Heatmap Section -->
-<h2>Activity Heatmap</h2>
-{% if user_stats and user_stats.heatmap_data %}
-<ul>
- {% for date, solved in user_stats.heatmap_data.items %}
-<li>{{ date }}: {{ solved }} problems</li>
- {% endfor %}
-</ul>
-{% else %}
-<p>No heatmap data found.</p>
-{% endif %}
+        <!-- Coding Stats Section -->
+        <section class="stats-section">
+            <h2><i class="fas fa-code"></i> Coding Stats</h2>
+            {% if user_stats and user_stats.cumulative_stats %}
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-value">{{ user_stats.cumulative_stats.Total|default:0 }}</span>
+                    <span class="stat-label">Total Solved</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">{{ user_stats.cumulative_stats.Easy|default:0 }}</span>
+                    <span class="stat-label">Easy</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">{{ user_stats.cumulative_stats.Medium|default:0 }}</span>
+                    <span class="stat-label">Medium</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">{{ user_stats.cumulative_stats.Hard|default:0 }}</span>
+                    <span class="stat-label">Hard</span>
+                </div>
+            </div>
+            
+            {% if user_stats.cumulative_stats.Topics %}
+            <div class="topics-section">
+                <h3>Topic-wise Distribution:</h3>
+                <div class="topics-grid">
+                    {% for topic, count in user_stats.cumulative_stats.Topics.items %}
+                    <div class="topic-item">
+                        <span class="topic-name">{{ topic }}</span>
+                        <span class="topic-count">{{ count }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <p>No topic-wise data available.</p>
+            {% endif %}
+            
+            {% else %}
+            <p>No coding data found.</p>
+            {% endif %}
+        </section>
 
-<!-- Streaks Section -->
-<h2>Streaks</h2>
-{% if user_stats and user_stats.current_streak is not None %}
-<p><strong>Current Streak:</strong> {{ user_stats.current_streak }} days</p>
-<p><strong>Max Streak:</strong> {{ user_stats.max_streak }} days</p>
-{% else %}
-<p>No streak data found.</p>
-{% endif %}
+        <!-- Coding Activity Heatmap -->
+        <section class="heatmap-section">
+            <h2><i class="fas fa-calendar-alt"></i> Coding Activity</h2>
+            {% if user_stats and user_stats.heatmap_data %}
+            <div class="heatmap-legend">
+                <span>Less</span>
+                <div class="legend-colors">
+                    <span style="background:#ebedf0;"></span>
+                    <span style="background:#9be9a8;"></span>
+                    <span style="background:#40c463;"></span>
+                    <span style="background:#30a14e;"></span>
+                    <span style="background:#216e39;"></span>
+                </div>
+                <span>More</span>
+            </div>
+            
+            <div class="github-heatmap">
+                {% for month, dates in coding_months.items reversed %}
+                <div class="month-column">
+                    <div class="month-label">{{ month|date:"M" }}</div>
+                    <div class="month-grid">
+                        {% for date in dates %}
+                        <div class="heatmap-cell 
+                            {% if coding_heatmap|get_item:date >= 10 %}color-4
+                            {% elif coding_heatmap|get_item:date >= 5 %}color-3
+                            {% elif coding_heatmap|get_item:date >= 3 %}color-2
+                            {% elif coding_heatmap|get_item:date >= 1 %}color-1
+                            {% else %}color-0{% endif %}"
+                            title="{{ date|date:'M d' }}: {{ coding_heatmap|get_item:date }} problems">
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p>No coding activity data available.</p>
+            {% endif %}
+        </section>
 
-<!-- GitHub Stats Section -->
-<h2>GitHub Stats</h2>
-{% if github_stats %}
-<p><strong>Repositories:</strong> {{ github_stats.repo_count|default:0 }}</p>
-<p><strong>Followers:</strong> {{ github_stats.follower_count|default:0 }}</p>
-<p><strong>Following:</strong> {{ github_stats.following_count|default:0 }}</p>
-<p><strong>Total Contributions:</strong> {{ github_stats.total_contributions|default:0 }}</p>
-<h3>GitHub Contribution Heatmap</h3>
- {% if github_stats.contribution_heatmap %}
-<ul>
- {% for date, contributions in github_stats.contribution_heatmap.items %}
-<li>{{ date }}: {{ contributions }} contributions</li>
- {% endfor %}
-</ul>
- {% else %}
-<p>No contribution data found.</p>
- {% endif %}
-{% else %}
-<p>No GitHub data available.</p>
-{% endif %}
+        <!-- Streaks Section -->
+        <section class="streaks-section">
+            <h2><i class="fas fa-fire"></i> Streaks</h2>
+            {% if user_stats and user_stats.current_streak is not None %}
+            <div class="streaks-grid">
+                <div class="streak-card">
+                    <span class="streak-value">{{ user_stats.current_streak }} days</span>
+                    <span class="streak-label">Current Streak</span>
+                </div>
+                <div class="streak-card">
+                    <span class="streak-value">{{ user_stats.max_streak }} days</span>
+                    <span class="streak-label">Max Streak</span>
+                </div>
+            </div>
+            {% else %}
+            <p>No streak data found.</p>
+            {% endif %}
+        </section>
+
+        <!-- GitHub Stats Section -->
+        <section class="stats-section">
+            <h2><i class="fab fa-github"></i> GitHub Stats</h2>
+            {% if github_stats %}
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-value">{{ github_stats.repo_count|default:0 }}</span>
+                    <span class="stat-label">Repositories</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">{{ github_stats.follower_count|default:0 }}</span>
+                    <span class="stat-label">Followers</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">{{ github_stats.following_count|default:0 }}</span>
+                    <span class="stat-label">Following</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">{{ github_stats.total_contributions|default:0 }}</span>
+                    <span class="stat-label">Contributions</span>
+                </div>
+            </div>
+            
+            <!-- GitHub Contributions Heatmap -->
+            <div class="heatmap-section">
+                <h3>GitHub Contributions</h3>
+                {% if github_stats.contribution_heatmap %}
+                <div class="heatmap-legend">
+                    <span>Less</span>
+                    <div class="legend-colors">
+                        <span style="background:#ebedf0;"></span>
+                        <span style="background:#9be9a8;"></span>
+                        <span style="background:#40c463;"></span>
+                        <span style="background:#30a14e;"></span>
+                        <span style="background:#216e39;"></span>
+                    </div>
+                    <span>More</span>
+                </div>
+                
+                <div class="github-heatmap">
+                    {% for month, dates in github_months.items reversed %}
+                    <div class="month-column">
+                        <div class="month-label">{{ month|date:"M" }}</div>
+                        <div class="month-grid">
+                            {% for date in dates %}
+                            <div class="heatmap-cell 
+                                {% if github_heatmap|get_item:date >= 10 %}color-4
+                                {% elif github_heatmap|get_item:date >= 5 %}color-3
+                                {% elif github_heatmap|get_item:date >= 3 %}color-2
+                                {% elif github_heatmap|get_item:date >= 1 %}color-1
+                                {% else %}color-0{% endif %}"
+                                title="{{ date|date:'M d' }}: {{ github_heatmap|get_item:date }} contributions">
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p>No contribution data available.</p>
+                {% endif %}
+            </div>
+            {% else %}
+            <p>No GitHub data available.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>
