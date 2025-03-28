@@ -3,11 +3,10 @@
 CodeTrack is a coding activity tracker that aggregates and visualizes a user's progress across multiple coding platforms. It helps users monitor their coding streaks, track solved problems, and analyze their learning patterns through an interactive dashboard.
 
 ## Features
+- **Dynamic Profile Management:** Allows users to add, update, or remove platform links, automatically refreshing stats.
 - **Platform Integration:** Fetches and aggregates data from LeetCode, GeeksforGeeks, and GitHub.
 - **Activity Heatmap:** Visualizes coding activity over time to track consistency.
-- **Streak Calculation:** Computes daily streaks based on aggregated submission data.
-- **Cumulative Stats:** Displays total questions solved, categorized by difficulty and topic.
-- **Dynamic Profile Management:** Allows users to add, update, or remove platform links, automatically refreshing stats.
+- **Cumulative Stats:** Displays total questions solved, categorized by difficulty.
 
 ## Tech Stack
 - **Backend:** Django, Python
